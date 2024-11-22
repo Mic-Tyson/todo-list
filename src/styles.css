@@ -161,22 +161,17 @@ button:disabled {
   }
 }
 
-body {
-  margin: 0;
-  display: grid;
-  grid-template-areas: 
-    "header header"
-    "sidebar main";
-  grid-template-columns: 1fr 10fr; 
-  grid-template-rows: 1 4fr;
-  height: 100vh;
-}
+
 
 header {
   grid-area: header;
   background-color: #4CAF50;
   padding: 20px;
   color: white;
+}
+
+header h1 {
+  display: block;
 }
 
 .sidebar {
@@ -190,10 +185,26 @@ header {
   padding: 20px;
 }
 
-.sidebar > .control {
-  display: flex;
-}
-
 .new-list-button {
   height: 50%;
+}
+
+body {
+  margin: 0;
+  display: grid;
+  grid-template-areas: 
+    "header header"
+    "sidebar main";
+  grid-template-columns: 1fr 10fr; 
+  grid-template-rows: 1 4fr;
+  height: 100vh;
+}
+
+header {
+  height: 1fr;
+}
+
+.sidebar > .control {
+  display: flex;
+  flex-direction: row;
 }

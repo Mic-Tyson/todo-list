@@ -132,6 +132,7 @@ const updateSidebar = () => {
 
     deleteButton.addEventListener('click', () => {
       deleteList(index);
+      save();
     });
   });
 };
@@ -174,6 +175,7 @@ form.addEventListener("submit", (e) => {
   }
 
   dialog.close();
+  save();
 });
 
 
@@ -194,6 +196,8 @@ listContainer.addEventListener("click", (e) => {
     const index = e.target.dataset.index;
     deleteTodo(activeList, index);
   }
+
+  save();
 });
 
 const openEditDialog = (list, index) => {
@@ -235,6 +239,8 @@ sidebar.addEventListener("click", (e) => {
     listDialog.close();
 
     updateSidebar();
+
+    save();
   }
 
   if(e.target.classList.contains("list-link")) {
@@ -245,31 +251,79 @@ sidebar.addEventListener("click", (e) => {
   } 
 });
 
+// Saving functions -------
+
+const save = () => {
+  const listsJson = JSON.stringify(lists);
+  localStorage.setItem("todoLists", listsJson);
+}
+
+const load = () => {
+    // Get the JSON string from localStorage
+    const listsJson = localStorage.getItem("todoLists");
+  
+    if (listsJson) {
+      const parsedLists = JSON.parse(listsJson);
+      lists = [];
+
+      parsedLists.forEach(list => {
+        const newList = List(list.title);
+  
+        list.todos.forEach(todo => {
+          const newTodo = Todo(
+            todo.title,
+            todo.desc,
+            todo.date,
+            todo.prio,
+            todo.tasks.map(task => Task(task.name, task.done))
+          );
+          newList.addTodo(newTodo);
+        });
+  
+        lists.push(newList);
+      });
+      updateSidebar();
+
+      const firstListLink = sidebar.querySelector(".list-link");
+      firstListLink.click();
+    }
+  };
+
 // Main -------------
 
 function deleteList(index) {
+  lists[index].todos.forEach((todo, i) => { deleteTodo(lists[index], i); });
   lists.splice(index, 1); 
+  save();
   updateSidebar(); 
 }
 
-const lists = [];
-const myTodoList = List("myTodoList");
+let lists = [];
 
-const task1 = Task("Finish TodoList");
-const task2 = Task("Finish Battleship");
+const data = [
+  {
+    "title": "myTodoList",
+    "todos": [
+      {
+        "title": "Finish Odin Project",
+        "desc": "The tasks yet remaining",
+        "date": "2025-01-01",
+        "prio": "High",
+        "tasks": [
+          {
+            "name": "Finish TodoList",
+            "done": false
+          },
+          {
+            "name": "Finish Battleship",
+            "done": false
+          }
+        ]
+      }
+    ]
+  }
+];
 
-const newTodo = Todo(
-  "Finish Odin Project", // Title
-  "The tasks yet remaining", // Description
-  "2025-01-01", // Due date
-  "High", // Priority
-  [task1, task2] // Tasks
-);
-myTodoList.addTodo(newTodo);
+localStorage.setItem("todoLists", JSON.stringify(data)); 
 
-lists.push(myTodoList)
-
-updateSidebar();
-const firstListLink = sidebar.querySelector(".list-link");
-while(!firstListLink) firstListLink = sidebar.querySelector(".list-link");
-firstListLink.click();
+load();
