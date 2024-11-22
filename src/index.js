@@ -140,7 +140,8 @@ const updateSidebar = () => {
 // Event Listeners --------------------
 showButton.addEventListener("click", (e) => {
   e.preventDefault();
-  dialog.showModal();
+  if(lists.length === 0) alert("create a project first");
+  else dialog.showModal();
 });
 
 form.addEventListener("submit", (e) => {
