@@ -2,13 +2,15 @@
 import "./styles.css";
 
 // List ------------------
-function List(...todos) {
+function List(titleStr, ...todos) {
+  const title = titleStr;
   const todoList = [...todos];
 
   const addTodo = (todo) => todoList.push(todo);
   const removeTodo = (index) => todoList.splice(index, 1);
+  const getTodos = () => [...todos];
 
-  return { todos: todoList, addTodo, removeTodo };
+  return { title, todos: todoList, addTodo, removeTodo };
 }
 
 // Todo ------------------
@@ -35,25 +37,20 @@ const dialog = document.getElementById("item-dialog");
 const form = dialog.querySelector("form");
 const addTaskButton = document.getElementById("add-task");
 const listContainer = document.querySelector(".list-container");
-
-const myTodoList = List();
+const sidebar = document.querySelector(".sidebar")
+const listDialog = document.getElementById("list-dialog");
 
 // DOM functions --------------
-const createListDiv = () => {
-  const div = document.createElement("div");
-  div.className = "todolist";
-  return div;
-};
 
-function deleteTodo(index) {
-  myTodoList.removeTodo(index);
+function deleteTodo(list, index) {
+  list.removeTodo(index);
   listContainer.innerHTML = "";
-  displayList(myTodoList);
+  displayList(list);
 }
 
 
 const displayList = (list) => {
-  listContainer.innerHTML = ""; // Clear existing items
+  listContainer.innerHTML = `<h1>${list.title}</h1>`; // Clear existing items
   list.todos.forEach((todo, i) => {
     listContainer.appendChild(generateTodoDiv(todo, i));
   });
@@ -112,6 +109,33 @@ const generateTaskFieldDiv = () => {
   return taskDiv;
 };
 
+const updateSidebar = () => {
+  const container = sidebar.querySelector(".list-name-container")
+  
+  container.innerHTML = ""; 
+  lists.forEach((list, index) => {
+    const listItem = document.createElement("button"); 
+    listItem.className = "list-link";
+    listItem.textContent = list.title;
+    listItem.dataset.index = index;
+
+    const deleteButton = document.createElement('button');
+    deleteButton.classList.add('delete-button');
+    deleteButton.innerText = 'Delete';
+    deleteButton.dataset.index = index;
+
+
+    const listContainer = document.createElement('div');
+    listContainer.appendChild(listItem);
+    listContainer.appendChild(deleteButton);
+    container.appendChild(listContainer);
+
+    deleteButton.addEventListener('click', () => {
+      deleteList(index);
+    });
+  });
+};
+
 // Event Listeners --------------------
 showButton.addEventListener("click", (e) => {
   e.preventDefault();
@@ -124,7 +148,7 @@ form.addEventListener("submit", (e) => {
   const title = form.elements["title"].value.trim();
   const desc = form.elements["desc"].value.trim();
   const dueDate = form.elements["date"].value;
-  const priority = form.querySelector('input[name="priority"]:checked')?.value || 'medium';
+  const priority = form.elements["prio"].value;
 
   const tasks = Array.from(document.querySelectorAll(".task-form-field")).map((taskField) => {
     const name = taskField.querySelector(".task-input-field").value.trim();
@@ -134,17 +158,22 @@ form.addEventListener("submit", (e) => {
 
   const newTodo = Todo(title, desc, dueDate, priority, tasks);
 
+  const activeListIndex =  sidebar.querySelector(".list-link[data-active='true']").dataset.index;
   const editingIndex = form.dataset.editingIndex;
 
-  if (editingIndex !== undefined) {
-    myTodoList.todos[editingIndex] = newTodo;
-    delete form.dataset.editingIndex;
-  } else {
-    myTodoList.addTodo(newTodo);
+  if (activeListIndex !== undefined) {
+    const list = lists[activeListIndex];
+    if (editingIndex !== undefined) {
+      list.todos[editingIndex] = newTodo;
+      delete form.dataset.editingIndex;
+    } else {
+      list.addTodo(newTodo);
+    }
+
+    displayList(list);
   }
 
   dialog.close();
-  displayList(myTodoList);
 });
 
 
@@ -154,18 +183,21 @@ addTaskButton.addEventListener("click", (e) => {
 });
 
 listContainer.addEventListener("click", (e) => {
+  const listIndex = sidebar.querySelector(".list-link[data-active='true']").dataset.index;
+  const activeList = lists[listIndex];
+
   if (e.target.classList.contains("edit-button")) {
     const index = e.target.dataset.index;
-    openEditDialog(index);
+    openEditDialog(activeList, index);
   }
   else if(e.target.classList.contains("delete-button")) {
     const index = e.target.dataset.index;
-    deleteTodo(index);
+    deleteTodo(activeList, index);
   }
 });
 
-const openEditDialog = (index) => {
-  const todo = myTodoList.todos[index];
+const openEditDialog = (list, index) => {
+  const todo = list.todos[index];
 
   form.elements["title"].value = todo.title;
   form.elements["desc"].value = todo.desc;
@@ -187,3 +219,57 @@ const openEditDialog = (index) => {
   form.dataset.editingIndex = index;
 };
 
+sidebar.addEventListener("click", (e) => {
+  if (e.target.classList.contains("new-list-button")) {
+    e.preventDefault();
+    listDialog.showModal();
+  }
+
+  if(e.target.classList.contains("submit")) {
+    e.preventDefault();
+    const title = listDialog.querySelector("form").elements["title"].value.trim();
+    const list = List(title);
+    console.log(list);
+
+    lists.push(list);
+    listDialog.close();
+
+    updateSidebar();
+  }
+
+  if(e.target.classList.contains("list-link")) {
+    const listIndex = e.target.closest(".list-link").dataset.index;
+    sidebar.querySelectorAll(".list-link").forEach((link) => link.removeAttribute("data-active"));
+    e.target.setAttribute("data-active", "true");
+    displayList(lists[listIndex]);
+  } 
+});
+
+// Main -------------
+
+function deleteList(index) {
+  lists.splice(index, 1); // Remove the list from the array
+  updateSidebar(); // Re-render the sidebar after deletion
+}
+
+const lists = [];
+const myTodoList = List("myTodoList");
+
+const task1 = Task("Finish TodoList");
+const task2 = Task("Finish Battleship");
+
+const newTodo = Todo(
+  "Finish Odin Project", // Title
+  "The tasks yet remaining", // Description
+  "2025-01-01", // Due date
+  "High", // Priority
+  [task1, task2] // Tasks
+);
+myTodoList.addTodo(newTodo);
+
+lists.push(myTodoList)
+
+updateSidebar();
+const firstListLink = sidebar.querySelector(".list-link");
+while(!firstListLink) firstListLink = sidebar.querySelector(".list-link");
+firstListLink.click();
