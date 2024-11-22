@@ -248,8 +248,8 @@ sidebar.addEventListener("click", (e) => {
 // Main -------------
 
 function deleteList(index) {
-  lists.splice(index, 1); // Remove the list from the array
-  updateSidebar(); // Re-render the sidebar after deletion
+  lists.splice(index, 1); 
+  updateSidebar(); 
 }
 
 const lists = [];
