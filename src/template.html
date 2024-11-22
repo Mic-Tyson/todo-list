@@ -1,0 +1,61 @@
+<h1>TodoList</h1>
+<div class="list-container">
+  
+  <div class="todo-container"><div class="todo-card">
+    <p>Title: Finish Odin Project</p>
+    <p>Description: the tasks yet remaining</p>
+    <p class="todo-priority priority-high">Priority: High</p>
+    <p>Due Date: 2025-01-01</p>
+  <div class="task-container"><div class="task">
+      <p>Finish TodoList</p>
+      <input type="checkbox">
+    </div><div class="task">
+      <p>Finish Battleship</p>
+      <input type="checkbox">
+    </div></div></div><div class="todo-actions">
+    <button class="item-control edit-button" data-index="0">Edit</button>
+    <button class="item-control delete-button" data-index="0">Delete</button>
+  </div></div>
+
+</div>
+<button id="add-item">Add item</button>
+
+<dialog id="item-dialog"> 
+  <form>
+    <label for="title">Title</label>
+    <input type="text" name="title" id="title">
+
+    <label for="desc">Description</label>
+    <input type="text" name="desc" id="desc">
+
+ 
+    <div class="priority-container">
+      <label>Priority: </label>
+      <label for="priority-high">High</label>
+      <input type="radio" name="priority" value="high" id="priority-high">
+
+      <label for="priority-medium">Medium</label>
+      <input type="radio" name="priority" value="medium" id="priority-medium">
+
+      <label for="priority-low">Low</label>
+      <input type="radio" name="priority" value="low" id="priority-low">
+    </div>
+
+    <label for="date">Due Date</label>
+    <input type="date" name="date" id="date">
+
+    <div class="tasks-container">
+      <div class="task-form-field">
+        <label for="task">Task</label>
+        <input type="text" name="task" id="task" class="task-input-field">
+
+        <label for="completed">Completed?</label>
+        <input type="checkbox" name="completed" id="completed" class="completed-input-field">
+      </div>
+  </div>
+
+    <button class="add-task" id="add-task">Add Task</button>
+
+    <button type="submit">Submit</button>
+  </form>
+</dialog>
